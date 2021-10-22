@@ -1,13 +1,21 @@
 {
   "routes": [
     {
+      "title": "Retrieve pets for adoption.",
+      "description": "Retrieve all of the animals who are up for pet adoption.",
+      "path": "/api/animals",
+      "method": "GET",
+      "filters": [ "RateLimit=2,10s" ],
+      "tags": ["pets"]
+    },
+    {
       "title": "Retrieve user information",
       "description": "Retrieve the current authenticated user's information.",
       "path": "/api/whoami",
       "method": "GET",
       "token-relay": true,
       "sso-enabled": true,
-      "tags": ["sso"]
+      "tags": ["pets"]
     },
     {
       "title": "Pet adoption API",
@@ -16,7 +24,7 @@
       "method": "POST",
       "token-relay": true,
       "sso-enabled": true,
-      "tags": ["pet adoption"],
+      "tags": ["adoptions"],
       "model": {
         "requestBody": {
           "description": "Manage adoption requests",
@@ -56,7 +64,7 @@
       "method": "PUT,DELETE",
       "token-relay": true,
       "sso-enabled": true,
-      "tags": ["pet adoption"],
+      "tags": ["adoptions"],
       "model": {
         "requestBody": {
           "description": "Manage adoption requests",

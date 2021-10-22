@@ -15,10 +15,10 @@ CF_API_PORTAL_SPACE="api-portal"
 #dekt4pets
 dekt4pets_gw="dekt4pets-gateway"
 dekt4pets_gw_config="api-config/dekt4pets-gateway.json"
-dekt4pets_backend="dekt4pets_backend"
-dekt4pets_backend_routes="api-config/dekt4pets_backend_routes.json"
-dekt4pets_frontend="dekt4pets_frontend"
-dekt4pets_frontend_routes="api-config/dekt4pets_frontend_routes.json"
+dekt4pets_backend="dekt4pets-backend"
+dekt4pets_backend_routes="api-config/dekt4pets-backend-routes.json"
+dekt4pets_frontend="dekt4pets-frontend"
+dekt4pets_frontend_routes="api-config/dekt4pets-frontend-routes.json"
 #datacheck
 datacheck_gw="datacheck-gateway"
 datacheck_gw_config="api-config/datacheck-gateway.json"
@@ -37,23 +37,23 @@ deploy() {
 
     cf login -a api.$CF_SYS_DOMAIN -u $CF_USER -p $CF_PASSWORD -s $CF_APP_SPACE --skip-ssl-validation
 
-    deploy-apps
+    deploy-dekt4pets
 
     deploy-brownfield
 
     deploy-api-portal
 }
 
-#deploy-apps
-deploy-apps () {
+#deploy-dekt4pets
+deploy-dekt4pets () {
 
     cf target -o $CF_ORG -s $CF_APP_SPACE 
 
     create-gateway $dekt4pets_gw $dekt4pets_gw_config
     
-    cf push -f manifest-apps.yml
+    cf push -f manifest-dekt4pets.yml
     
-    cf bind-service $dekt4petsFrontenddName $dekt4pets_gw -c $dekt4pets_frontend_routes
+    cf bind-service $dekt4pets_frontend $dekt4pets_gw -c $dekt4pets_frontend_routes
     cf bind-service $dekt4pets_backend $dekt4pets_gw -c $dekt4pets_backend_routes
 
     dynamic-routes-update $dekt4pets_frontend $dekt4pets_gw $dekt4pets_frontend_routes
@@ -75,7 +75,7 @@ deploy-brownfield() {
     cf bind-service $payments $payments_gw -c $paymentdRoutesConfig
 
     dynamic-routes-update $datacheck $datacheck_gw $datacheck_routes 
-    dynamic-routes-update $payments $datacheck_gw $payments_routes
+    dynamic-routes-update $payments $payments_gw $payments_routes
 
 #api-portal
 api-portal () {
@@ -115,9 +115,11 @@ dynamic-routes-update() {
 #update-backend
 update-backend() {
     
+    cf target -o $CF_ORG -s $CF_APP_SPACE
+
     cf restage $dekt4pets_backend
     
-    dynamic-routes-update $dekt4pets_backend $dekt4pets_backend_routes
+    dynamic-routes-update $dekt4pets_backend $dekt4pets_gw $dekt4pets_backend_routes
 }
 
 #create-gateway
