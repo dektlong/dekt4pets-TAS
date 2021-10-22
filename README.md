@@ -10,7 +10,7 @@ Sample app for VMware's Spring Cloud Gateway commercial products on TAS.
 - Required scopes on routes (tag: `require-sso-scopes`)
 - Circuit breaker filter
 
-![architecture](./docs/images/animal-rescue-arch.png)
+- update vars in the `demo.sh` script. CF_USER needs to have permision to create spaces
 
 Run the following scripts to set up everything:
 ```bash
@@ -19,6 +19,7 @@ Run the following scripts to set up everything:
 ```
 Then visit the frontend url `https://dekt4pets.${appsDomain}/rescue` to view the sample app.
 
+API-portal is available at `https://dekt-api-portal.${appsDomain}/apis`
 
 All the gateway configuration can be found and updated here:
 
