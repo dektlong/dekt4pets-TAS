@@ -1,0 +1,15 @@
+{
+  "sso": {
+    "plan": "uaa"
+  },
+  "count": 2,
+  "memory": "2G",
+  "disk": "512M",
+  "host": "dekt4pets",
+  "title": "dekt4pets micro gateway",
+  "description": "dekt4pets micro gateway for api-driven microservices developement",
+  "documentation": "https://github.com/spring-cloud-services-samples/animal-rescue/",
+  "version": "1.0.0-SNAPSHOT",
+  "error-routes": [ { "code": "404", "redirect-path": "/rescue" } ],
+  "routes": [ { "uri": "https://example.org", "path": "/fallback/**" } ]
+}
