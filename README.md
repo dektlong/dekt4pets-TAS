@@ -1,6 +1,6 @@
 # Dekt4Pets on TAS
 
-# Deploy
+## Deploy
 Sample app for VMware's Spring Cloud Gateway commercial products on TAS.
 
 - Routing traffic to configured internal routes with container-to-container network
@@ -30,7 +30,7 @@ All the gateway configuration can be found and updated here:
 - Frontend routes configuration used on binding used on bind: `api-config/dekt4pets-frontend-routes.json`
 - Backend routes configuration used on binding used on bind:`api-config/dekt4pets-gateway.json` 
 
-# Update
+## Update
 
 - Add the following to `api-config/dekt4pets-backend-routes.json` 
 ```
