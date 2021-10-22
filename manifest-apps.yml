@@ -13,5 +13,3 @@ applications:
     - route: dekt4pets-backend.apps.internal
   env:
     JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'
-services:
-  - dekt4pets-gateway

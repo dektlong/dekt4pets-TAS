@@ -1,14 +1,12 @@
 ---
 applications:
-- name: user-services
+- name: datacheck
   path: ./backend/build/libs/backend-0.0.1-SNAPSHOT.jar
   memory: 1G
   outes:
-    - route: user-services.apps.internal
+    - route: datacheck.apps.internal
   env:
     JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'
-  services:
-  - user-services-gateway
 - name: payments
   path: ./backend/build/libs/backend-0.0.1-SNAPSHOT.jar
   memory: 1G
@@ -16,5 +14,3 @@ applications:
     - route: payments.apps.internal
   env:
     JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'
-  services:
-  - payments-gateway

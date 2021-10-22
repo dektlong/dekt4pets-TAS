@@ -7,67 +7,96 @@ CF_PASSWORD="appcloud"
 CF_ORG="dekt"
 CF_APP_SPACE="dekt4pets"
 CF_BROWNFIELD_SPACE="brownfield"
+CF_API_PORTAL_SPACE="api-portal"
 
 #-------------------------------------------------------------------------------------
 # do not update these vars unless you modify the manifest and api-config files as well
 #-------------------------------------------------------------------------------------
 #dekt4pets
-dekt4petsGatewayName="dekt4pets-gateway"
-det4petsGatewayConfig="api-config/dekt4pets-gateway.json"
-dekt4petsBackendName="dekt4pets-backend"
-dekt4petsBackendRoutesConfig="api-config/dekt4pets-backend-routes.json"
-dekt4petsFrontendName="dekt4pets-frontend"
-dekt4petsFrontendRoutesConfig="api-config/dekt4pets-frontend-routes.json"
-#user-services
-userServicesGatewayName="user-services-gateway"
-userServicesGatewayConfig="api-config/user-services-gateway.json"
-userServicesAppName="user-services"
-userServicesRoutesConfig="api-config/user-services-gateway.json"
+dekt4pets_gw="dekt4pets-gateway"
+dekt4pets_gw_config="api-config/dekt4pets-gateway.json"
+dekt4pets_backend="dekt4pets_backend"
+dekt4pets_backend_routes="api-config/dekt4pets_backend_routes.json"
+dekt4pets_frontend="dekt4pets_frontend"
+dekt4pets_frontend_routes="api-config/dekt4pets_frontend_routes.json"
+#datacheck
+datacheck_gw="datacheck-gateway"
+datacheck_gw_config="api-config/datacheck-gateway.json"
+datacheck="datacheck"
+datacheck_routes="api-config/datacheck-routes.json"
 #payments
-paymentsGatewayName="payments-gateway"
-userServicesGatewayConfig="api-config/payments-gateway.json"
-paymentsAppName="payments"
-paymentsRoutesConfig="api-config/payments-gateway.json"
+payments_gw="payments-gateway"
+payments_gw_config="api-config/payments-gateway.json"
+payments="payments"
+payments_routes="api-config/payments-routes.json"
 #api-portal
-apiPortalAppName="dekt-api-portal"
+api_portal="dekt-api-portal"
 
 #deploy
 deploy() {
 
-    cf login -a api.$CF_SYS_DOMAIN -o $CF_ORG -s $CF_APP_SPACE -u $CF_USER -p $CF_PASSWORD --skip-ssl-validation
+    cf login -a api.$CF_SYS_DOMAIN -u $CF_USER -p $CF_PASSWORD -s $CF_APP_SPACE --skip-ssl-validation
 
-    #apps
-    create-gateway $dekt4petsGatewayName $det4petsGatewayConfig
+    deploy-apps
 
+    deploy-brownfield
+
+    deploy-api-portal
+}
+
+#deploy-apps
+deploy-apps () {
+
+    cf target -o $CF_ORG -s $CF_APP_SPACE 
+
+    create-gateway $dekt4pets_gw $dekt4pets_gw_config
+    
     cf push -f manifest-apps.yml
+    
+    cf bind-service $dekt4petsFrontenddName $dekt4pets_gw -c $dekt4pets_frontend_routes
+    cf bind-service $dekt4pets_backend $dekt4pets_gw -c $dekt4pets_backend_routes
 
-    dynamic-routes-update $dekt4petsBackendName $dekt4petsBackendRoutesConfig
-    dynamic-routes-update $dekt4petsFrontendName $dekt4petsFrontendRoutesConfig
+    dynamic-routes-update $dekt4pets_frontend $dekt4pets_gw $dekt4pets_frontend_routes
+    dynamic-routes-update $dekt4pets_backend $dekt4pets_gw $dekt4pets_backend_routes
+    
+}
+
+#deploy-brownfield
+deploy-brownfield() {
 
     cf target -o $CF_ORG -s $CF_BROWNFIELD_SPACE
 
-    #brownfield
-    create-gateway $userServicesGatewayName $userServicesGatewayConfig
-    create-gateway $paymentsGatewayName $userServicesGatewayConfig
+    create-gateway $datacheck_gw $datacheck_gw_config
+    create-gateway $payments_gw $payments_gw_config
 
     cf push -f manifest-brownfield.yml
 
-    dynamic-routes-update $userServicesAppName $userServicesRoutesConfig
-    dynamic-routes-update $paymentsAppName $paymentsRoutesConfig
+    cf bind-service $datacheck $datacheck_gw -c $datacheck_routes
+    cf bind-service $payments $payments_gw -c $paymentdRoutesConfig
 
-    #api-portal
+    dynamic-routes-update $datacheck $datacheck_gw $datacheck_routes 
+    dynamic-routes-update $payments $datacheck_gw $payments_routes
+
+#api-portal
+api-portal () {
+
+    cf target -o $CF_ORG -s $CF_API_PORTAL_SPACE
+
     cf push -f manifest-api-portal.yml
-    cf set-env $apiPortalAppName API_PORTAL_SOURCE_URLS: "https://scg-service-broker.$CF_SYS_DOMAIN/openapi"
+    cf set-env $api_portal API_PORTAL_SOURCE_URLS: "https://scg-service-broker.$CF_SYS_DOMAIN/openapi"
 }
-
+    
+}
 #dynamic-routes-update
 dynamic-routes-update() {
 
     app_name=$1
-    route_config_file=$2
+    gateway_name=$2
+    route_config_file=$3
+    
     
     app_guid=$(cf app "$app_name" --guid)
-    gateway_service_instance_id="$(cf service $GATEWAY_NAME --guid)"
+    gateway_service_instance_id="$(cf service $gateway_name --guid)"
     gateway_url=$(cf curl /v2/service_instances/"$gateway_service_instance_id" | jq .entity.dashboard_url | sed "s/\/scg-dashboard//" | sed "s/\"//g")
 
     printf "Calling dynamic binding update endpoint for %s...\n=====\n\n" "$app_name"
@@ -86,9 +115,9 @@ dynamic-routes-update() {
 #update-backend
 update-backend() {
     
-    cf restage $BACKEND_APP_NAME
+    cf restage $dekt4pets_backend
     
-    dynamic-routes-update $BACKEND_APP_NAME -c $BACKEND_ROUTE_CONFIG
+    dynamic-routes-update $dekt4pets_backend $dekt4pets_backend_routes
 }
 
 #create-gateway
@@ -114,23 +143,27 @@ create-gateway() {
 #cleanup
 cleanup() {
 
+    #portal
+    cf target -o $CF_ORG -s $CF_API_PORTAL_SPACE
+    cf delete -f $api_portal
+    
     #brownfield
     cf target -o $CF_ORG -s $CF_BROWNFIELD_SPACE
-    cf unbind-service $userServicesAppName $userServicesGatewayName
-    cf unbind-service $paymentsAppName $paymentssGatewayName
-    cf delete-service -f $userServicesGatewayName
-    cf delete-service -f $paymentsGatewayName
-    cf delete -f $userServicesAppName
-    cf delete -f $paymentsAppName
-    cf delete -f $apiPortalAppName
+    cf unbind-service $datacheck $datacheck_gw
+    cf unbind-service $payments $payments_gw
+    cf delete-service -f $datacheck_gw
+    cf delete-service -f $payments_gw
+    cf delete -f $datacheck
+    cf delete -f $payments
+   
 
     #apps
     cf target -o $CF_ORG -s $CF_APP_SPACE
-    cf unbind-service $dekt4petsBackendName $dekt4petsGatewayName
-    cf unbind-service $dekt4petsFrontenddName $dekt4petsGatewayName
-    cf delete-service -f $dekt4petsGatewayName
-    cf delete -f $dekt4petsBackendName
-    cf delete -f $dekt4petsFrontenddName
+    cf unbind-service $dekt4pets_backend $dekt4pets_gw
+    cf unbind-service $dekt4pets_frontend $dekt4pets_gw
+    cf delete-service -f $dekt4pets_gw
+    cf delete -f $dekt4pets_backend
+    cf delete -f $dekt4pets_frontend
 
 
 }
@@ -155,7 +188,6 @@ build)
     ;;
 update-backend)
 	update-backend
-	;;
 	;;
 cleanup)
     cleanup
