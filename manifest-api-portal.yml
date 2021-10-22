@@ -4,4 +4,3 @@ applications:
   path: api-portal-server-1.0.3.jar
   env:
     JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'
-    API_PORTAL_SOURCE_URLS: "https://scg-service-broker.sys.porcupine.cf-app.com/openapi"
