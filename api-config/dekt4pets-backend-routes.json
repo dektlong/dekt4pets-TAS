@@ -1,14 +1,6 @@
 {
   "routes": [
     {
-      "title": "Retrieve pets for adoption.",
-      "description": "Retrieve all of the animals who are up for pet adoption.",
-      "path": "/api/animals",
-      "method": "GET",
-      "filters": [ "RateLimit=2,10s" ],
-      "tags": ["pet adoption"]
-    },
-    {
       "title": "Retrieve user information",
       "description": "Retrieve the current authenticated user's information.",
       "path": "/api/whoami",

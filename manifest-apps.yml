@@ -13,7 +13,5 @@ applications:
     - route: dekt4pets-backend.apps.internal
   env:
     JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'
-- name: dekt-api-portal
-  path: ./api-portal/api-portal-server-1.0.3.jar
-  env:
-    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'
+services:
+  - dekt4pets-gateway

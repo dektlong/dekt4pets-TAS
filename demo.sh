@@ -7,7 +7,6 @@ CF_PASSWORD="appcloud"
 CF_ORG="dekt"
 CF_SPACE="dekt4pets"
 GATEWAY_NAME="dekt4pets-gateway"
-API_PORTAL_APP_NAME="dekt-api-portal"
 BACKEND_APP_NAME="dekt4pets-backend"
 FRONTEND_APP_NAME="dekt4pets-frontend"
 GATEWAY_CONFIG="api-config/dekt4pets-gateway.json"
@@ -28,11 +27,13 @@ deploy() {
 
     wait-for-gateway-creation
 
-    cf push 
+    cf push -f manifest-apps.yml
 
-    bind-update
+    cf push -f manifest-api-portal.yml
 
-    cf set-env $API_PORTAL_APP_NAME API_PORTAL_SOURCE_URLS "https://scg-service-broker.$CF_SYS_DOMAIN/openapi"
+    dynamic-routes-update $BACKEND_APP_NAME -c $BACKEND_ROUTE_CONFIG
+
+    dynamic-routes-update $FRONTEND_APP_NAME -c $FRONTEND_ROUTE_CONFIG
 }
 
 #dynamic-routes-update
@@ -58,10 +59,12 @@ dynamic-routes-update() {
     fi
 }
 
-#bind-update
-bind-update () {
-    unbind-all
-    bind-all
+#update-backend
+update-backend() {
+    
+    cf restage $BACKEND_APP_NAME
+    
+    dynamic-routes-update $BACKEND_APP_NAME -c $BACKEND_ROUTE_CONFIG
 }
 #bind-all
 bind-all() {
