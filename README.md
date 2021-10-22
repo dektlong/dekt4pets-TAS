@@ -9,8 +9,11 @@ Sample app for VMware's Spring Cloud Gateway commercial products on TAS.
 - SSO login and token relay on behalf of the routed services
 - Required scopes on routes (tag: `require-sso-scopes`)
 - Circuit breaker filter
+- api-portal on TAS
+- 'brownfield' api dynamic updates
 
-- update vars in the `demo.sh` script. (orgs and space needs to exist prior to running)
+
+> **_NOTE:_** update vars in the `demo.sh` script. (orgs and space needs to exist prior to running)
 
 Run the following scripts to set up everything:
 ```bash
