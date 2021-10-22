@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#CF_ENDPOINT="api.run.haas-459.pez.vmware.com"
-CF_ENDPOINT="api.sys.porcupine.cf-app.com"
+#CF_SYS_DOMAIN="run.haas-459.pez.vmware.com"
+CF_SYS_DOMAIN="sys.porcupine.cf-app.com"
 CF_USER="dekel"
 CF_PASSWORD="appcloud"
 CF_ORG="dekt"
@@ -22,7 +22,7 @@ deploy() {
 
     #build-project
 
-    cf login -a $CF_ENDPOINT -o $CF_ORG -s $CF_SPACE -u $CF_USER -p $CF_PASSWORD --skip-ssl-validation
+    cf login -a api.$CF_SYS_DOMAIN -o $CF_ORG -s $CF_SPACE -u $CF_USER -p $CF_PASSWORD --skip-ssl-validation
 
     cf create-service p.gateway standard $GATEWAY_NAME -c $GATEWAY_CONFIG
 
@@ -30,9 +30,9 @@ deploy() {
 
     cf push 
 
-    update
+    bind-update
 
-    cf set-env $API_PORTAL_APP_NAME API_PORTAL_SOURCE_URLS "https://scg-service-broker.$CF_ENDPOINT/openapi"
+    cf set-env $API_PORTAL_APP_NAME API_PORTAL_SOURCE_URLS "https://scg-service-broker.$CF_SYS_DOMAIN/openapi"
 }
 
 #dynamic-routes-update
