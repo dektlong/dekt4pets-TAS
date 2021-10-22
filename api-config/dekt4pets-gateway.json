@@ -10,6 +10,5 @@
   "description": "dekt4pets micro gateway for api-driven microservices developement",
   "documentation": "https://github.com/spring-cloud-services-samples/animal-rescue/",
   "version": "1.0.0-SNAPSHOT",
-  "error-routes": [ { "code": "404", "redirect-path": "/rescue" } ],
-  "routes": [ { "uri": "https://example.org", "path": "/fallback/**" } ]
+  "error-routes": [ { "code": "404", "redirect-path": "/rescue" } ]
 }
