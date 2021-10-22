@@ -5,30 +5,39 @@ CF_SYS_DOMAIN="sys.porcupine.cf-app.com"
 CF_USER="dekel"
 CF_PASSWORD="appcloud"
 CF_ORG="dekt"
-CF_SPACE="dekt4pets"
-GATEWAY_NAME="dekt4pets-gateway"
-BACKEND_APP_NAME="dekt4pets-backend"
-FRONTEND_APP_NAME="dekt4pets-frontend"
-GATEWAY_CONFIG="api-config/dekt4pets-gateway.json"
-BACKEND_ROUTE_CONFIG="api-config/dekt4pets-backend-routes.json"
-FRONTEND_ROUTE_CONFIG="api-config/dekt4pets-frontend-routes.json"
+CF_APP_SPACE="dekt4pets"
+CF_BROWNFIELD_SPACE="brownfield"
 
 #deploy
 deploy() {
 
-    cf login -a api.$CF_SYS_DOMAIN -o $CF_ORG -s $CF_SPACE -u $CF_USER -p $CF_PASSWORD --skip-ssl-validation
+    cf login -a api.$CF_SYS_DOMAIN -o $CF_ORG -s $CF_APP_SPACE -u $CF_USER -p $CF_PASSWORD --skip-ssl-validation
 
-    cf create-service p.gateway standard $GATEWAY_NAME -c $GATEWAY_CONFIG
-
-    wait-for-gateway-creation
+    #apps
+    create-gateway "dekt4pets-gateway" "api-config/dekt4pets-gateway.json"
 
     cf push -f manifest-apps.yml
 
+    dynamic-routes-update "dekt4pets-backend" "api-config/dekt4pets-backend-routes.json"
+    dynamic-routes-update "dekt4pets-frontend" "api-config/dekt4pets-frontend-routes.json"
+
+    cf target -o $CF_ORG -s $CF_BROWNFIELD_SPACE
+
+    #brownfield
+    create-gateway "user-services-gateway" "api-config/user-services-gateway.json"
+    create-gateway "payments-gateway" "api-config/payments-gateway.json"
+
+    cf push -f manifest-brownfield.yml
+
+    dynamic-routes-update "user-services" "api-config/user-services-routes.json"
+    dynamic-routes-update "payments" "api-config/payments-routes.json"
+
+    #api-portal
     cf push -f manifest-api-portal.yml
 
-    dynamic-routes-update $BACKEND_APP_NAME -c $BACKEND_ROUTE_CONFIG
 
-    dynamic-routes-update $FRONTEND_APP_NAME -c $FRONTEND_ROUTE_CONFIG
+
+
 }
 
 #dynamic-routes-update
@@ -73,18 +82,29 @@ unbind-all() {
     cf unbind-service $FRONTEND_APP_NAME $GATEWAY_NAME
 }
 
-#wait-for-gateway-creation
-wait-for-gateway-creation() {
+#create-gateway
+create-gateway() {
     
+    gatewayName=$1
+    routeConfigPath=$2
+
+    cf create-service p.gateway standard $gatewayName -c $routeConfigPath
+
     echo
-	printf "Waiting for $GATEWAY_NAME to create."
+	printf "Waiting for $gatewayName to create."
 	while [ `cf services | grep 'in progress' | wc -l | sed 's/ //g'` != 0 ]; do
   		printf "."
   		sleep 5
 	done
 	echo
-	echo "$GATEWAY_NAME creation completed."
+	echo "$gatewayName creation completed."
 	echo
+}
+
+#add-brownfield-apis
+add-brownfield-apis () {
+
+
 }
 
 #cleanup
@@ -121,22 +141,18 @@ update)
 build)
     build-project
     ;;
-update-frontend-routes)
-	dynamic-routes-update $FRONTEND_APP_NAME $FRONTEND_ROUTE_CONFIG
+update-backend)
+	update-backend
 	;;
-update-backend-routes)
-	dynamic-routes-update $BACKEND_APP_NAME $BACKEND_ROUTE_CONFIG
 	;;
 cleanup)
     cleanup
     ;;
 *)
   	echo "incorrect usage. Please specify one of the following:"
-    echo "  * deploy"
-    echo "  * update"
     echo "  * build"
-    echo "  * update-backend-routes"
-    echo "  * update-frontend-routes"
+    echo "  * deploy"
+    echo "  * update-backend"
     echo "  * cleanup"
   	;;
 esac

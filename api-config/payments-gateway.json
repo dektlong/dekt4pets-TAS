@@ -1,0 +1,12 @@
+{
+  "sso": {
+    "plan": "uaa"
+  },
+  "count": 2,
+  "memory": "2G",
+  "disk": "512M",
+  "host": "payments",
+  "title": "Payments Services",
+  "description": "External APIs to provide payments services",
+  "version": "1.0.0-SNAPSHOT"
+}
