@@ -10,7 +10,7 @@ Sample app for VMware's Spring Cloud Gateway commercial products on TAS.
 - Required scopes on routes (tag: `require-sso-scopes`)
 - Circuit breaker filter
 
-- update vars in the `demo.sh` script. CF_USER needs to have permision to create spaces
+- update vars in the `demo.sh` script. (orgs and space needs to exist prior to running)
 
 Run the following scripts to set up everything:
 ```bash
@@ -94,4 +94,4 @@ All the gateway configuration can be found and updated here:
 
 - navigate to api-portal and show the new added api `check-adopter` 
 
-- run this api: ``https://dekt4pets.${appsDomain}/api/check-adopter`
+- run this api: `https://dekt4pets.${appsDomain}/api/check-adopter`

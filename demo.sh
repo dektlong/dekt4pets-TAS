@@ -13,13 +13,8 @@ GATEWAY_CONFIG="api-config/dekt4pets-gateway.json"
 BACKEND_ROUTE_CONFIG="api-config/dekt4pets-backend-routes.json"
 FRONTEND_ROUTE_CONFIG="api-config/dekt4pets-frontend-routes.json"
 
-#don't foget to add to the generate rsa cert in opsman tas tile
-#*.run.haas-459.pez.vmware.com,*.login.run.haas-459.pez.vmware,*.uaa.run.haas-459.pez.vmware,*.cfapps.haas-459.pez.vmware.com
-
 #deploy
 deploy() {
-
-    #build-project
 
     cf login -a api.$CF_SYS_DOMAIN -o $CF_ORG -s $CF_SPACE -u $CF_USER -p $CF_PASSWORD --skip-ssl-validation
 
