@@ -72,7 +72,7 @@ deploy-brownfield() {
     cf push -f manifest-brownfield.yml
 
     cf bind-service $datacheck $datacheck_gw -c $datacheck_routes
-    cf bind-service $payments $payments_gw -c $paymentdRoutesConfig
+    cf bind-service $payments $payments_gw -c $payment_routes
 
     dynamic-routes-update $datacheck $datacheck_gw $datacheck_routes 
     dynamic-routes-update $payments $payments_gw $payments_routes
