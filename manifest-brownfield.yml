@@ -2,11 +2,9 @@
 applications:
 - name: datacheck
   path: ./frontend/build
-  memory: 1G
-  outes:
-    - route: datacheck.apps.internal
-- name: payments
-  path: ./frontend/build
-  memory: 1G
   routes:
-    - route: payments.apps.internal
+    - route: datacheck.apps.internal
+#- name: payments
+#  path: ./frontend/build
+#  routes:
+#    - route: payments.apps.internal
