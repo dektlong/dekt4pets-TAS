@@ -40,21 +40,12 @@ All the gateway configuration can be found and updated here:
       "path": "/api/check-adopter",
       "method": "GET",
       "filters": [ "RateLimit=2,10s" ],
-      "tags": ["pet adoption"]
+      "tags": ["pets"]
 },
 ```
 - Add the following to `backend/src/main/java/io/spring/cloud/samples/animalrescue/backend/AnimalController.java`
 ```
     @GetMapping("/check-adopter")
-	public String checkAdopter(Principal adopter) {
-
-		if (adopter == null) {
-			return "Error: Invalid adopter ID";
-		}
-
-		String adopterID = adopter.getName();
-    
-		String @GetMapping("/check-adopter")
 	public String checkAdopter(Principal adopter) {
 
 		if (adopter == null) {

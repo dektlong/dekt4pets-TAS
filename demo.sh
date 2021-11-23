@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-CF_SYS_DOMAIN="run.pcfone.io"
-CF_USER="SSO" #SSO for pcf-one
-CF_PASSWORD="appcloud"
-CF_ORG="dekt-pcfone"
+CF_SYS_DOMAIN="sys.naplesyellow.cf-app.com" #run.pcfone.io
+CF_USER="admin" #SSO for pcf-one and remeber to update sso-plan to 'dekt-prod' in all gw configs
+CF_PASSWORD="nxbjQ97NgRi8obO-B0Biz99N60TRwKJT"
+CF_ORG="dekt-lob" #dekt-pcfone
 CF_APP_SPACE="dekt4pets"
 CF_BROWNFIELD_SPACE="brownfield"
 CF_API_PORTAL_SPACE="api-portal"
@@ -39,9 +39,9 @@ api_portal="dekt-api-portal"
 deploy() {
 
     if [ $CF_USER = "SSO" ]; then
-        cf login -a api.$CF_SYS_DOMAIN --sso
+        cf login -a api.$CF_SYS_DOMAIN --sso -o $CF_ORG -s $CF_APP_SPACE
     else        
-        cf login -a api.$CF_SYS_DOMAIN -u $CF_USER -p $CF_PASSWORD -s $CF_APP_SPACE --skip-ssl-validation
+        cf login -a api.$CF_SYS_DOMAIN -u $CF_USER -p $CF_PASSWORD -o $CF_ORG -s $CF_APP_SPACE --skip-ssl-validation
     fi
 
     deploy-dekt4pets
@@ -53,8 +53,6 @@ deploy() {
 
 #deploy-dekt4pets
 deploy-dekt4pets () {
-
-    cf target -o $CF_ORG -s $CF_APP_SPACE 
 
     create-gateway $dekt4pets_gw $dekt4pets_gw_config
     
@@ -92,6 +90,7 @@ deploy-api-portal () {
 
     cf push -f manifest-api-portal.yml
     cf set-env $api_portal API_PORTAL_SOURCE_URLS "https://scg-service-broker.$CF_SYS_DOMAIN/openapi"
+    cf set-env $api_portal API_PORTAL_SOURCE_URLS_CACHE_TTL_SEC 10
 
     cf restage $api_portal
 }
@@ -156,7 +155,7 @@ cleanup() {
 
     #portal
     cf target -o $CF_ORG -s $CF_API_PORTAL_SPACE
-    cf delete -f $api_portal
+    cf delete -f -r $api_portal
     
     #brownfield
     cf target -o $CF_ORG -s $CF_BROWNFIELD_SPACE
@@ -164,8 +163,8 @@ cleanup() {
     cf unbind-service $payments $payments_gw
     cf delete-service -f $datacheck_gw
     cf delete-service -f $payments_gw
-    cf delete -f $datacheck
-    cf delete -f $payments
+    cf delete -f -r $datacheck
+    cf delete -f -r $payments
    
 
     #apps
@@ -173,8 +172,8 @@ cleanup() {
     cf unbind-service $dekt4pets_backend $dekt4pets_gw
     cf unbind-service $dekt4pets_frontend $dekt4pets_gw
     cf delete-service -f $dekt4pets_gw
-    cf delete -f $dekt4pets_backend
-    cf delete -f $dekt4pets_frontend
+    cf delete -f -r $dekt4pets_backend
+    cf delete -f -r $dekt4pets_frontend
 
 
 }
@@ -194,10 +193,6 @@ deploy)
 update)
     bind-update
     ;;
-build)
-    deploy-api-portal
-    #build-project
-    ;;
 update-backend)
 	update-backend
 	;;
@@ -206,7 +201,6 @@ cleanup)
     ;;
 *)
   	echo "incorrect usage. Please specify one of the following:"
-    echo "  * build"
     echo "  * deploy"
     echo "  * update-backend"
     echo "  * cleanup"
